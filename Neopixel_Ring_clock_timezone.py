@@ -67,43 +67,48 @@ for i in range(secnow): # print blanks to make up the beginning of the console c
     sys.stdout.flush() # needed to print to console; not needed in Thonny.
 
 # continue with both console and LED ring clock here
-while(True):               # main loop for both LEDs and console
-    pixels.fill(fill_off)  # shut off all the pixels--or shut off previous, light new
-    print('*', end="")  # always print the second tick
-    sys.stdout.flush()
-    
-    hourLED=(hournow%12)*5 + (minnow//12)   # Advance blue 5 pixels every hour in 12 hour time, not 24 hour
-    
-    # check on hand crossings and color mixing to show overlaps correctly
-#    if (secnow==minnow and secnow==hournow): # seconds, minutes, hour all coincide  # error here?
-    if (secnow==minnow==hourLED):               # seconds, minutes, hour LED all coincide
-        all_on=(intensity,intensity,intensity)
-        pixels[secnow]=all_on
-    elif (secnow==minnow):
-        pixels[secnow]=(intensity,intensity,00)        # seconds and minutes coincide
-        pixels[hourLED]=(00,      00,       intensity)
-    elif (secnow==hourLED):
-        pixels[secnow]=(00,       intensity,intensity) # seconds and hour coincide
-        pixels[minnow]=(intensity,00,       00)
-    elif (minnow==hourLED):
-        pixels[minnow]=(intensity,00,       intensity) # minutes and hour coincide
-        pixels[secnow]=(00,       intensity,00)
-    else:                                              # if got here, they're all different.
-        pixels[secnow]=(00,       intensity,00)        # red for seconds
-        pixels[minnow]=(intensity,00,       00)        # green for minute
-        pixels[hourLED]=(00,      00,       intensity) # blue for hour
-    
-    pixels.show()
-    
-    while(secnow==datetime.now(tz).second):
-        time.sleep(0.005)   # 5 ms is plenty; use this instead of pass to keep processor cool
-    now = datetime.now(tz)  # update second
-    secnow  = now.second  # need to update secnow for the while loop
-    minnow  = now.minute
-    hournow = now.hour
+try:
+    while(True):               # main loop for both LEDs and console
+        pixels.fill(fill_off)  # shut off all the pixels--or shut off previous, light new
+        print('*', end="")  # always print the second tick
+        sys.stdout.flush()
+        
+        hourLED=(hournow%12)*5 + (minnow//12)   # Advance blue 5 pixels every hour in 12 hour time, not 24 hour
+        
+        # check on hand crossings and color mixing to show overlaps correctly
+    #    if (secnow==minnow and secnow==hournow): # seconds, minutes, hour all coincide  # error here?
+        if (secnow==minnow==hourLED):               # seconds, minutes, hour LED all coincide
+            all_on=(intensity,intensity,intensity)
+            pixels[secnow]=all_on
+        elif (secnow==minnow):
+            pixels[secnow]=(intensity,intensity,00)        # seconds and minutes coincide
+            pixels[hourLED]=(00,      00,       intensity)
+        elif (secnow==hourLED):
+            pixels[secnow]=(00,       intensity,intensity) # seconds and hour coincide
+            pixels[minnow]=(intensity,00,       00)
+        elif (minnow==hourLED):
+            pixels[minnow]=(intensity,00,       intensity) # minutes and hour coincide
+            pixels[secnow]=(00,       intensity,00)
+        else:                                              # if got here, they're all different.
+            pixels[secnow]=(00,       intensity,00)        # red for seconds
+            pixels[minnow]=(intensity,00,       00)        # green for minute
+            pixels[hourLED]=(00,      00,       intensity) # blue for hour
+        
+        pixels.show()
+        
+        while(secnow==datetime.now(tz).second):
+            time.sleep(0.005)   # 5 ms is plenty; use this instead of pass to keep processor cool
+        now = datetime.now(tz)  # update second
+        secnow  = now.second  # need to update secnow for the while loop
+        minnow  = now.minute
+        hournow = now.hour
 
-    if secnow==0:  # console: start new line at each top of minute
-        print('\r\n')
-        if (now.minute==0):
-            print("hour ", now.hour, '\r\n')
-        print("hour: ", now.hour, "  minute: ", now.minute)
+        if secnow==0:  # console: start new line at each top of minute
+            print('\r\n')
+            if (now.minute==0):
+                print("hour ", now.hour, '\r\n')
+            print("hour: ", now.hour, "  minute: ", now.minute)
+
+except KeyboardInterrupt:
+    pixels.fill((0,0,0))
+    pixels.show()
