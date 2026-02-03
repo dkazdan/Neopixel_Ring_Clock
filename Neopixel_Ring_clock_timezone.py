@@ -38,6 +38,8 @@ intensity = 25
 # The number of NeoPixels in the clock ring
 # 60 seconds per minute red, 60 minutes per hour green, 60 fifths of an hour blue per twelve hours
 num_pixels = 60
+LEDS_PER_HOUR = num_pixels // 12
+MINUTES_PER_LED = 60 // LEDS_PER_HOUR
 
 # The order of the pixel colors - RGB or GRB.
 ORDER = neopixel.RGB
@@ -51,6 +53,17 @@ pixels = neopixel.NeoPixel(
 fill_off=(0,0,0)
 pixels.fill(fill_off)
 pixels.show()
+# declare colors
+RED   = (0, intensity, 0)
+GREEN = (intensity//2, 0, 0)
+BLUE  = (0, 0, intensity)
+WHITE = (intensity, intensity, intensity)
+
+YELLOW = (intensity, intensity, 0)
+CYAN   = (0, intensity, intensity)
+MAGENTA= (intensity, 0, intensity)
+
+
 
 # print statements are console diagnostics, don't affect clock LEDs
 print('\r\n')
@@ -73,26 +86,28 @@ try:
         print('*', end="")  # always print the second tick
         sys.stdout.flush()
         
-        hourLED=(hournow%12)*5 + (minnow//12)   # Advance blue 5 pixels every hour in 12 hour time, not 24 hour
-        
+        hourLED=(
+            (hournow%12)*LEDS_PER_HOUR
+            + (minnow // MINUTES_PER_LED)   # Advance blue 5 pixels every hour in 12 hour time, not 24 hour
+        )
         # check on hand crossings and color mixing to show overlaps correctly
     #    if (secnow==minnow and secnow==hournow): # seconds, minutes, hour all coincide  # error here?
         if (secnow==minnow==hourLED):               # seconds, minutes, hour LED all coincide
-            all_on=(intensity,intensity,intensity)
+            all_on=WHITE
             pixels[secnow]=all_on
         elif (secnow==minnow):
-            pixels[secnow]=(intensity,intensity,00)        # seconds and minutes coincide
-            pixels[hourLED]=(00,      00,       intensity)
+            pixels[secnow]=YELLOW        # seconds and minutes coincide
+            pixels[hourLED]=BLUE
         elif (secnow==hourLED):
-            pixels[secnow]=(00,       intensity,intensity) # seconds and hour coincide
-            pixels[minnow]=(intensity,00,       00)
+            pixels[secnow]=CYAN # seconds and hour coincide
+            pixels[minnow]=GREEN
         elif (minnow==hourLED):
-            pixels[minnow]=(intensity,00,       intensity) # minutes and hour coincide
-            pixels[secnow]=(00,       intensity,00)
+            pixels[minnow]=MAGENTA # minutes and hour coincide
+            pixels[secnow]=RED
         else:                                              # if got here, they're all different.
-            pixels[secnow]=(00,       intensity,00)        # red for seconds
-            pixels[minnow]=(intensity,00,       00)        # green for minute
-            pixels[hourLED]=(00,      00,       intensity) # blue for hour
+            pixels[secnow]=RED#(00,       intensity,00)        # red for seconds
+            pixels[minnow]=GREEN      # green for minute
+            pixels[hourLED]=BLUE # blue for hour
         
         pixels.show()
         
