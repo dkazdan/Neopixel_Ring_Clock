@@ -1,8 +1,17 @@
+"""
+Object-oriented version of ring clock with pytz timezone awareness.
+4 February 2026
+DK
+"""
 #! /usr/bin/python3
 
 from datetime import datetime
 import time
 import pytz
+"""deprecated.  Should use Use datetime.timezone.utc instead of pytz.UTC.
+Use the datetime constructor parameter tzinfo or .replace() instead of .localize().
+Remove .normalize() calls. If the datetime is timezone-aware, then the wall time arithmetic should work even across daylight saving time clock changes. More on that in the Gotcha section below!
+Use zoneinfo.ZoneInfo instead of pytz.timezone to get a tzinfo object."""
 import board
 import neopixel
 import sys
@@ -30,7 +39,7 @@ class NeoPixelClock:
 
         # Colors (intentionally tuned, not literal RGB names)
         self.RED     = (0, intensity, 0)
-        self.GREEN   = (intensity // 2, 0, 0)
+        self.GREEN   = (intensity // 2, 0, 0) # green is dimmed to correspond to visual perception
         self.BLUE    = (0, 0, intensity)
         self.WHITE   = (intensity, intensity, intensity)
         self.YELLOW  = (intensity, intensity, 0)
@@ -47,7 +56,7 @@ class NeoPixelClock:
             pixel_order=neopixel.RGB,
         )
 
-        self.clear()
+        self.clear() # shut off entire NeoPixel string; equivalent to np.fill((0,0,0))
 
     # ---------- Hardware helpers ----------
 
@@ -56,6 +65,7 @@ class NeoPixelClock:
         self.pixels.show()
 
     # ---------- Time math ----------
+    # generalized this in case 24 pixel ring ever used
 
     def hour_led(self, hour, minute):
         return (
@@ -69,10 +79,10 @@ class NeoPixelClock:
         self.pixels.fill(self.OFF)
         hour_led = self.hour_led(hour, minute)
 
-        if sec == minute == hour_led:
+        if sec == minute == hour_led: # i.e., all the clock hands are together
             self.pixels[sec] = self.WHITE
 
-        elif sec == minute:
+        elif sec == minute:           # second and minute hands together...etc.
             self.pixels[sec] = self.YELLOW
             self.pixels[hour_led] = self.BLUE
 
@@ -84,7 +94,7 @@ class NeoPixelClock:
             self.pixels[minute] = self.MAGENTA
             self.pixels[sec] = self.RED
 
-        else:
+        else:                         # all three clock hands on different LEDs
             self.pixels[sec] = self.RED
             self.pixels[minute] = self.GREEN
             self.pixels[hour_led] = self.BLUE
@@ -97,7 +107,7 @@ class NeoPixelClock:
         now = datetime.now(self.tz)
         sec = now.second
 
-        # Console alignment
+        # Use console for onscreen reference. Alignment:
         print("\n")
         for _ in range(sec):
             print(" ", end="")
@@ -109,23 +119,25 @@ class NeoPixelClock:
                 sec = now.second
                 minute = now.minute
                 hour = now.hour
-
+                
+                # run the console
                 print("*", end="")
                 sys.stdout.flush()
 
+                # run the ring of LEDs
                 self.draw(sec, minute, hour)
 
                 # wait for next second
                 while datetime.now(self.tz).second == sec:
-                    time.sleep(0.005)
+                    time.sleep(0.005) # use this instead of pass to keep microprocessor cool
 
-                if sec == 0:
+                if sec == 0: # new minute starting, show that on console
                     print("\n")
                     if minute == 0:
                         print("hour ", hour, "\n")
                     print("hour: ", hour, "  minute: ", minute)
 
-        except KeyboardInterrupt:
+        except KeyboardInterrupt: # keypress in console clears the LEDs and shuts off the clock
             self.clear()
 
 
