@@ -2,6 +2,7 @@
 Object-oriented version of ring clock with pytz timezone awareness.
 4 February 2026
 Added power-on Morse message 10 February 2026
+Added top of hour Morse message 11 February 2026
 DK
 """
 #! /usr/bin/python3
@@ -186,8 +187,7 @@ class NeoPixelClock:
 
                 if (minute == sec == 0):
                     print('\ntop of hour')
-                    flash_ID()
-                    # TODO: Clear clock, send Morse, restart clock.
+                    flash_ID() # works but stops the clock hands
                     # need to keep console going.
                     # ? run separate process so clock can continue, too?
 
