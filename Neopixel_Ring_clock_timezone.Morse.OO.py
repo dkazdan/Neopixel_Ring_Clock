@@ -186,6 +186,7 @@ class NeoPixelClock:
 
                 if (minute == sec == 0):
                     print('\ntop of hour')
+                    flash_ID()
                     # TODO: Clear clock, send Morse, restart clock.
                     # need to keep console going.
                     # ? run separate process so clock can continue, too?
