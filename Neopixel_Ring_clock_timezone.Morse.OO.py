@@ -20,6 +20,7 @@ import sys
 
 
 class NeoPixelClock:
+    # enough Morse for W8EDU, N8OBJ, W8EDU, and attention signal "V".  Add as necessary.
     MORSE = {
         'A': '.-',
         'B': '-...',
