@@ -1,6 +1,7 @@
 """
 Object-oriented version of ring clock with pytz timezone awareness.
 4 February 2026
+Added power-on Morse message 10 February 2026
 DK
 """
 #! /usr/bin/python3
@@ -8,10 +9,10 @@ DK
 from datetime import datetime
 import time
 import pytz
-"""deprecated.  Should use Use datetime.timezone.utc instead of pytz.UTC.
-Use the datetime constructor parameter tzinfo or .replace() instead of .localize().
-Remove .normalize() calls. If the datetime is timezone-aware, then the wall time arithmetic should work even across daylight saving time clock changes. More on that in the Gotcha section below!
-Use zoneinfo.ZoneInfo instead of pytz.timezone to get a tzinfo object."""
+# deprecated.  Should use Use datetime.timezone.utc instead of pytz.UTC.
+# Use the datetime constructor parameter tzinfo or .replace() instead of .localize().
+# Remove .normalize() calls. If the datetime is timezone-aware, then the wall time arithmetic should work even across daylight saving time clock changes. More on that in the Gotcha section below!
+# Use zoneinfo.ZoneInfo instead of pytz.timezone to get a tzinfo object.
 import board
 import neopixel
 import sys
@@ -20,14 +21,17 @@ import sys
 class NeoPixelClock:
     MORSE = {
         'A': '.-',
+        'B': '-...',
         'D': '-..',
         'E': '.',
-        '8': '---..',
+        'J': '.---',
+        'N': '_.',
+        'O': '___',
         'U': '..-',
         'Y': '-.--',
         'V': '...-',
         'W': '.--',
-        'DE': '-.. .',
+        '8': '---..',
         'SK': '...-.-',
         ' ': ' ',
     }
@@ -121,7 +125,7 @@ class NeoPixelClock:
         DASH = 3 * time_unit
         INTRA = time_unit
         INTER = 3 * time_unit
-        INTERW= 7 * time_unit
+        INTERWORD= 7 * time_unit
 
         for char in message:
             pattern = self.MORSE.get(char.upper())
@@ -140,16 +144,19 @@ class NeoPixelClock:
 
             time.sleep(INTER) # end each symbol with intersymbol time
             
-        time.sleep(INTERW) # end each string with interword time
+        time.sleep(INTERWORD) # end each string with interword time
 
 
     # ---------- Main loop ----------
 
     def run(self):
-        self.flash_morse("VVV", led=0, time_unit=0.1)
-        self.flash_morse("W8EDU", led=0, time_unit=0.1)
-        self.flash_morse("VVV", led=0, time_unit=0.1)
-        time.sleep(0.5)
+        def flash_ID():
+            self.flash_morse("VVV", led=0, time_unit=0.1)
+            self.flash_morse("W8EDU", led=0, time_unit=0.1)
+            self.flash_morse("VVV", led=0, time_unit=0.1)
+
+        flash_ID() # at powerup
+        
         now = datetime.now(self.tz)
         sec = now.second
 
@@ -176,6 +183,12 @@ class NeoPixelClock:
                 # wait for next second
                 while datetime.now(self.tz).second == sec:
                     time.sleep(0.005) # use this instead of pass to keep microprocessor cool
+
+                if (minute == sec == 0):
+                    print('\ntop of hour')
+                    # TODO: Clear clock, send Morse, restart clock.
+                    # need to keep console going.
+                    # ? run separate process so clock can continue, too?
 
                 if sec == 0: # new minute starting, show that on console
                     print("\n")
