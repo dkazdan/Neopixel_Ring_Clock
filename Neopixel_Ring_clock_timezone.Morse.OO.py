@@ -139,6 +139,11 @@ class NeoPixelClock:
                 time.sleep(DOT if symbol == '.' else DASH)
 
                 self.pixels[led] = self.OFF
+                # try this to keep clock going. I think the show() is now in the wrong place.
+                # This works because the clock draw is during the Morse blank time.
+                now = datetime.now(self.tz)
+                self.draw(now.second, now.minute, now.hour)
+                # end try this
                 self.pixels.show()
                 time.sleep(INTRA)
 
