@@ -20,15 +20,14 @@ import sys
 
 
 class NeoPixelClock:
-    # enough Morse for W8EDU, N8OBJ, W8EDU, and attention signal "V".  Add as necessary.
     MORSE = {
         'A': '.-',
         'B': '-...',
         'D': '-..',
         'E': '.',
         'J': '.---',
-        'N': '_.',
-        'O': '___',
+        'N': '-.',
+        'O': '---',
         'U': '..-',
         'Y': '-.--',
         'V': '...-',
@@ -38,8 +37,7 @@ class NeoPixelClock:
         ' ': ' ',
     }
     
-    def __init__(
-        self,
+    def __init__(self,
         pixel_pin=board.D18,
         num_pixels=60,
         timezone="US/Eastern",
@@ -76,11 +74,11 @@ class NeoPixelClock:
             pixel_order=neopixel.RGB,
         )
 
-        self.clear() # shut off entire NeoPixel string; equivalent to np.fill((0,0,0))
+        self.clear() 
 
     # ---------- Hardware helpers ----------
 
-    def clear(self):
+    def clear(self): # shut off entire NeoPixel string; equivalent to np.fill((0,0,0))
         self.pixels.fill(self.OFF)
         self.pixels.show()
 
@@ -122,7 +120,7 @@ class NeoPixelClock:
         self.pixels.show()
         
     # ---------- Flash top LED in Morse ----------
-    def flash_morse(self, message, led=0, time_unit=0.18, last_string=True):
+    def flash_morse(self, message, led=0, time_unit=0.18): # time 0.1 is 12 WPM
         DOT = time_unit
         DASH = 3 * time_unit
         INTRA = time_unit
@@ -188,8 +186,9 @@ class NeoPixelClock:
 
                 if (minute == sec == 0):
                     print('\ntop of hour')
+                    self.clear()    # shut off the hands
                     flash_ID() # works but stops the clock hands
-                    # need to keep console going.
+                    # could restart console better
                     # ? run separate process so clock can continue, too?
 
                 if sec == 0: # new minute starting, show that on console
